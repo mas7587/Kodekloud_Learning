@@ -1,7 +1,4 @@
 
-Your score
-18%
-Pass Percentage - 100%
 Q. 1
 
 Task
@@ -41,21 +38,21 @@ Create the pod as per the requirements:
 
 
 
-kubectl apply -f - << EOF
-apiVersion: v1
-kind: Pod
-metadata:
-  name: tester-cka02-svcn
-  namespace: dev-cka02-svcn
-spec:
-  containers:
-  - name: tester-cka02-svcn
-    image: registry.k8s.io/e2e-test-images/jessie-dnsutils:1.3
-    command:
-      - sleep
-      - "3600"
-  restartPolicy: Always
-EOF
+    kubectl apply -f - << EOF
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: tester-cka02-svcn
+      namespace: dev-cka02-svcn
+    spec:
+      containers:
+      - name: tester-cka02-svcn
+        image: registry.k8s.io/e2e-test-images/jessie-dnsutils:1.3
+        command:
+          - sleep
+          - "3600"
+      restartPolicy: Always
+    EOF
 
 
 
@@ -74,7 +71,7 @@ command terminated with exit code 1
 Looks like something is broken at the moment, if we observe the kube-system namespace, we will see no coredns pods are not running which is creating the problem, let's scale them for the nslookup command to work:
 
 
-kubectl scale deployment -n kube-system coredns --replicas=2
+    kubectl scale deployment -n kube-system coredns --replicas=2
 
 
 
@@ -82,7 +79,7 @@ kubectl scale deployment -n kube-system coredns --replicas=2
 Now let store the correct output into the /root/dns_output on student-node :
 
 
-kubectl exec -n dev-cka02-svcn -i -t tester-cka02-svcn -- nslookup kubernetes.default >> /root/dns_output
+    kubectl exec -n dev-cka02-svcn -i -t tester-cka02-svcn -- nslookup kubernetes.default >> /root/dns_output
 
 
 
@@ -117,7 +114,7 @@ Command "sleep 3600" specified ?
 
 Correct dns output stored in '/root/dns_output" ?
 
-Q. 2
+## Q. 2
 
 Task
 SECTION: ARCHITECTURE, INSTALL AND MAINTENANCE
@@ -126,14 +123,14 @@ SECTION: ARCHITECTURE, INSTALL AND MAINTENANCE
 For this question, please set the context to cluster3 by running:
 
 
-kubectl config use-context cluster3
+    kubectl config use-context cluster3
 
 
 
 Run a pod called alpine-sleeper-cka15-arch using the alpine image in the default namespace that will sleep for 7200 seconds.
 
 
-Q. 3
+## Q. 3
 
 Task
 SECTION: ARCHITECTURE, INSTALL AND MAINTENANCE
