@@ -88,12 +88,12 @@ We should have something similar to below output:
 
 
 
-student-node ~ ➜  cat /root/dns_output
-Server:         10.96.0.10
-Address:        10.96.0.10#53
-
-Name:   kubernetes.default.svc.cluster.local
-Address: 10.96.0.1
+        student-node ~ ➜  cat /root/dns_output
+        Server:         10.96.0.10
+        Address:        10.96.0.10#53
+        
+        Name:   kubernetes.default.svc.cluster.local
+        Address: 10.96.0.1
 
 Details
 
@@ -159,12 +159,12 @@ student-node ~ ➜  kubectl edit clusterrole green-role-cka22-arch --context clu
 
 At the end add below code:
 
-- apiGroups:
-  - "*"
-  resources:
-  - namespaces
-  verbs:
-  - get
+        - apiGroups:
+          - "*"
+          resources:
+          - namespaces
+          verbs:
+          - get
 
 
 
@@ -176,7 +176,7 @@ yes
 
 Details
 
-Q. 4
+## Q. 4
 
 Task
 SECTION: TROUBLESHOOTING
