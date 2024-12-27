@@ -595,6 +595,50 @@ We tried to schedule grey-cka21-trb pod on cluster4 which was supposed to be dep
 
 You can SSH into the cluster4 using ssh cluster4-controlplane command.
 
+Solution
+
+---
+Follow below given steps
+Let's check the POD status
+        kubectl get pod --context=cluster4
+
+You will see that grey-cka21-trb pod is stuck in Pending state. So let's try to look into the logs and events
+
+        kubectl logs grey-cka21-trb --context=cluster4
+        kubectl get event --context=cluster4 --field-selector involvedObject.name=grey-cka21-trb
+
+You might not find any relevant info in the logs/events. Let's check the status of the kube-scheduler pod
+
+        kubectl get pod --context=cluster4 -n kube-system
+
+You will notice that kube-scheduler-cluster4-controlplane pod us crashing, let's look into its logs
+
+        kubectl logs kube-scheduler-cluster4-controlplane --context=cluster4 -n kube-system
+    
+You will see an error as below:
+
+run.go:74] "command failed" err="failed to get delegated authentication kubeconfig: failed to get delegated authentication kubeconfig: stat /etc/kubernetes/scheduler.config: no such file or directory"
+
+From the logs we can see that its looking for a file called /etc/kubernetes/scheduler.config which seems incorrect, let's look into the kube-scheduler manifest on cluster4.
+
+        ssh cluster4-controlplane
+
+First let's find out if /etc/kubernetes/scheduler.config
+
+        ls /etc/kubernetes/scheduler.config
+
+You won't find it, instead the correct file is /etc/kubernetes/scheduler.conf so let's modify the manifest.
+
+        vi /etc/kubernetes/manifests/kube-scheduler.yaml 
+
+Search for config in the file, you will find some typos, change every occurence of /etc/kubernetes/scheduler.config to /etc/kubernetes/scheduler.conf.
+
+Let's see if kube-scheduler-cluster4-controlplane is running now
+
+        kubectl get pod -A
+
+It should be good now and grey-cka21-trb should be good as well.
+
 # Q. 12
 
 Task
