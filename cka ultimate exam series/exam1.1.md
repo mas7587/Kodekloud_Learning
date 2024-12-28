@@ -812,8 +812,13 @@ Edit the deployment
 
 You will notice that some of the keys are different what are reffered in the deployment.
 
-Change some env keys: db to database , db-user to username and db-password to password
-Change a secret reference: db-user-cka05-trb to db-user-pass-cka05-trb
+Change some env keys: 
+        db to database ,
+        
+        db-user to username and db-password to password
+        
+        Change a secret reference: db-user-cka05-trb to db-user-pass-cka05-trb
+
 Finally save the changes.
 Details
 
