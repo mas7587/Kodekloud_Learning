@@ -1,4 +1,4 @@
-Q. 1
+# Q. 1
 
 Task
 SECTION: ARCHITECTURE, INSTALL AND MAINTENANCE
@@ -13,21 +13,21 @@ NOTE: It's recommended to wait for a few minutes to allow deployed objects to be
 Solution
 Check out the metrics for all node across all clusters:
 
-student-node ~ ➜  kubectl top node --context cluster1 --no-headers | sort -nr -k2 | head -1
-cluster1-controlplane   127m   1%    703Mi   1%    
-
-student-node ~ ➜  kubectl top node --context cluster2 --no-headers | sort -nr -k2 | head -1
-cluster2-controlplane   126m   1%    675Mi   1%    
-
-student-node ~ ➜  kubectl top node --context cluster3 --no-headers | sort -nr -k2 | head -1
-cluster3-controlplane   577m   7%    1081Mi   1%    
-
-student-node ~ ➜  kubectl top node --context cluster4 --no-headers | sort -nr -k2 | head -1
-cluster4-controlplane   130m   1%    679Mi   1%    
-
-student-node ~ ➜  
-
-student-node ~ ➜  
+    student-node ~ ➜  kubectl top node --context cluster1 --no-headers | sort -nr -k2 | head -1
+    cluster1-controlplane   127m   1%    703Mi   1%    
+    
+    student-node ~ ➜  kubectl top node --context cluster2 --no-headers | sort -nr -k2 | head -1
+    cluster2-controlplane   126m   1%    675Mi   1%    
+    
+    student-node ~ ➜  kubectl top node --context cluster3 --no-headers | sort -nr -k2 | head -1
+    cluster3-controlplane   577m   7%    1081Mi   1%    
+    
+    student-node ~ ➜  kubectl top node --context cluster4 --no-headers | sort -nr -k2 | head -1
+    cluster4-controlplane   130m   1%    679Mi   1%    
+    
+    student-node ~ ➜  
+    
+    student-node ~ ➜  
 
 
 
@@ -37,11 +37,11 @@ Using this, find the node that uses most cpu. In this case, it is cluster3-contr
 
 Save the result in the correct format to the file:
 
-student-node ~ ➜  echo cluster3,cluster3-controlplane > /opt/high_cpu_node
+    student-node ~ ➜  echo cluster3,cluster3-controlplane > /opt/high_cpu_node
 
 Details
 
-Q. 2
+# Q. 2
 
 Task
 SECTION: ARCHITECTURE, INSTALL AND MAINTENANCE
@@ -49,7 +49,7 @@ SECTION: ARCHITECTURE, INSTALL AND MAINTENANCE
 
 Before proceeding, ensure you are operating within the correct Kubernetes context by switching to cluster1 with the following command:
 
-kubectl config use-context cluster1
+    kubectl config use-context cluster1
 
 We have set up a service account named blue-sa-cka21-arch, along with a cluster role blue-role-cka21-arch and a corresponding cluster role binding blue-role-binding-cka21-arch.
 
@@ -61,51 +61,51 @@ Ensure you are working within the correct Kubernetes context:
 kubectl config use-context cluster1
 
 Since you're restricting the service account from cluster-wide access to namespace-specific access, you might need to delete the existing ClusterRoleBinding:
-kubectl delete clusterrolebinding blue-role-binding-cka21-arch
+    kubectl delete clusterrolebinding blue-role-binding-cka21-arch
 
 Create a Role that specifically allows get operations on pods within the default namespace:
-apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  namespace: default
-  name: blue-role-cka21-arch
-rules:
-- apiGroups: [""]
-  resources: ["pods"]
-  verbs: ["get"]
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: Role
+    metadata:
+      namespace: default
+      name: blue-role-cka21-arch
+    rules:
+    - apiGroups: [""]
+      resources: ["pods"]
+      verbs: ["get"]
 
 Save this to a file named role.yaml and apply it with:
 
-kubectl apply -f role.yaml
+    kubectl apply -f role.yaml
 
 Bind the service account to the new role using a RoleBinding. This grants the service account the permissions defined in the role, but only within the default namespace:
-apiVersion: rbac.authorization.k8s.io/v1
-kind: RoleBinding
-metadata:
-  name: blue-role-binding-cka21-arch
-  namespace: default
-subjects:
-- kind: ServiceAccount
-  name: blue-sa-cka21-arch
-  namespace: default
-roleRef:
-  kind: Role
-  name: blue-role-cka21-arch
-  apiGroup: rbac.authorization.k8s.io
+    apiVersion: rbac.authorization.k8s.io/v1
+    kind: RoleBinding
+    metadata:
+      name: blue-role-binding-cka21-arch
+      namespace: default
+    subjects:
+    - kind: ServiceAccount
+      name: blue-sa-cka21-arch
+      namespace: default
+    roleRef:
+      kind: Role
+      name: blue-role-cka21-arch
+      apiGroup: rbac.authorization.k8s.io
 
 Save this to a file named rolebinding.yaml and apply it with:
 
-kubectl apply -f rolebinding.yaml
+    kubectl apply -f rolebinding.yaml
 
 To ensure that the permissions are correctly set, you can use the kubectl auth can-i command to check if the service account can perform the desired action within the default namespace:
-kubectl auth can-i get pods --as=system:serviceaccount:default:blue-sa-cka21-arch --namespace default
+    kubectl auth can-i get pods --as=system:serviceaccount:default:blue-sa-cka21-arch --namespace default
 
 This command should return yes, confirming that the service account can now get pods in the default namespace.
 
 Details
 
 
-Q. 3
+# Q. 3
 
 Task
 SECTION: ARCHITECTURE, INSTALL AND MAINTENANCE
@@ -123,14 +123,14 @@ A pod called color-app-cka13-arch has been created in the default namespace. Thi
 Solution
 Export the current pod definition:
 
-student-node ~ ➜  kubectl get pod color-app-cka13-arch -o yaml > /tmp/color-app-cka13-arch.yaml
+    student-node ~ ➜  kubectl get pod color-app-cka13-arch -o yaml > /tmp/color-app-cka13-arch.yaml
 
 
 
 
 Edit the pod definition file to make the required changes:
 
-student-node ~ ➜ vi /tmp/color-app-cka13-arch.yaml
+    student-node ~ ➜ vi /tmp/color-app-cka13-arch.yaml
 
 
 
@@ -140,14 +140,14 @@ Under env: -> - name: APP_COLOR change value: pink to value: green
 
 Replace the pod:
 
-student-node ~ ➜ kubectl replace -f /tmp/color-app-cka13-arch.yaml --force
+    student-node ~ ➜ kubectl replace -f /tmp/color-app-cka13-arch.yaml --force
 
-pod "color-app-cka13-arch" deleted
-pod/color-app-cka13-arch replaced
+    pod "color-app-cka13-arch" deleted
+    pod/color-app-cka13-arch replaced
 
 Details
 
-Q. 4
+# Q. 4
 
 Task
 SECTION: SCHEDULING
@@ -175,19 +175,19 @@ kubectl config use-context cluster1
 
 List the deployments in test-wl08 namespace as follows: -
 
-kubectl get deploy -n test-wl08
+    kubectl get deploy -n test-wl08
 
 
 
 Run the following command to check the revisions of the deployment called trace-wl08:-
 
-kubectl rollout history deployment -n test-wl08 trace-wl08 
+    kubectl rollout history deployment -n test-wl08 trace-wl08 
 
 
 
 Inspect the revision 2 by using the --revision option: -
 
-kubectl rollout history deployment -n test-wl08 trace-wl08 --revision=2
+    kubectl rollout history deployment -n test-wl08 trace-wl08 --revision=2
 
 
 
@@ -195,12 +195,12 @@ Under the Containers section, you will see the image name.
 
 On the student-node, save that image name in the given file /opt/trace-wl08-revision-book.txt:
 
-echo "busybox:1.35" > /opt/trace-wl08-revision-book.txt
+    echo "busybox:1.35" > /opt/trace-wl08-revision-book.txt
 
 Details
 
 
-Q. 5
+# Q. 5
 
 Task
 SECTION: ARCHITECTURE, INSTALL AND MAINTENANCE
@@ -222,45 +222,45 @@ Identify the permissions of this service account and write down the answer in fi
 Solution
 Get the red-role-cka23-arch role permissions:
 
-student-node ~ ➜  kubectl get clusterrole red-role-cka23-arch -o json --context cluster1
-
-{
-    "apiVersion": "rbac.authorization.k8s.io/v1",
-    "kind": "ClusterRole",
-    "metadata": {
-        "creationTimestamp": "2022-10-20T07:16:39Z",
-        "name": "red-role-cka23-arch",
-        "resourceVersion": "16324",
-        "uid": "e53cef4f-ae1b-49f7-b9fa-ac5e7e22a61c"
-    },
-    "rules": [
-        {
-            "apiGroups": [
-                "apps"
-            ],
-            "resources": [
-                "deployments"
-            ],
-            "verbs": [
-                "get",
-                "list",
-                "watch"
-            ]
-        }
-    ]
-}
-
-
+    student-node ~ ➜  kubectl get clusterrole red-role-cka23-arch -o json --context cluster1
+    
+    {
+        "apiVersion": "rbac.authorization.k8s.io/v1",
+        "kind": "ClusterRole",
+        "metadata": {
+            "creationTimestamp": "2022-10-20T07:16:39Z",
+            "name": "red-role-cka23-arch",
+            "resourceVersion": "16324",
+            "uid": "e53cef4f-ae1b-49f7-b9fa-ac5e7e22a61c"
+        },
+        "rules": [
+            {
+                "apiGroups": [
+                    "apps"
+                ],
+                "resources": [
+                    "deployments"
+                ],
+                "verbs": [
+                    "get",
+                    "list",
+                    "watch"
+                ]
+            }
+        ]
+    }
+    
+    
 
 
 In this case, add data in file as below:
 
-student-node ~ ➜ echo "resource:deployments|verbs:get,list,watch" > /opt/red-sa-cka23-arch
+    student-node ~ ➜ echo "resource:deployments|verbs:get,list,watch" > /opt/red-sa-cka23-arch
 
 Details
 
 
-Q. 6
+# Q. 6
 
 Task
 SECTION: STORAGE
@@ -276,23 +276,23 @@ kubectl config use-context cluster1
 Create a storage class called orange-stc-cka07-str as per the properties given below:
 
 
-- Provisioner should be kubernetes.io/no-provisioner.
-
-- Volume binding mode should be WaitForFirstConsumer.
+    - Provisioner should be kubernetes.io/no-provisioner.
+    
+    - Volume binding mode should be WaitForFirstConsumer.
 
 
 Next, create a persistent volume called orange-pv-cka07-str as per the properties given below:
 
 
-- Capacity should be 150Mi.
-
-- Access mode should be ReadWriteOnce.
-
-- Reclaim policy should be Retain.
-
-- It should use storage class orange-stc-cka07-str.
-
-- Local path should be /opt/orange-data-cka07-str.
+    - Capacity should be 150Mi.
+    
+    - Access mode should be ReadWriteOnce.
+    
+    - Reclaim policy should be Retain.
+    
+    - It should use storage class orange-stc-cka07-str.
+    
+    - Local path should be /opt/orange-data-cka07-str.
 
 - Also add node affinity to create this value on cluster1-controlplane.
 
@@ -300,68 +300,68 @@ Next, create a persistent volume called orange-pv-cka07-str as per the propertie
 Finally, create a persistent volume claim called orange-pvc-cka07-str as per the properties given below:
 
 
-- Access mode should be ReadWriteOnce.
-
-- It should use storage class orange-stc-cka07-str.
-
-- Storage request should be 128Mi.
-
-- The volume should be orange-pv-cka07-str.
+    - Access mode should be ReadWriteOnce.
+    
+    - It should use storage class orange-stc-cka07-str.
+    
+    - Storage request should be 128Mi.
+    
+    - The volume should be orange-pv-cka07-str.
 
 Solution
 Create a yaml file as below:
-kind: StorageClass
-apiVersion: storage.k8s.io/v1
-metadata:
-  name: orange-stc-cka07-str
-provisioner: kubernetes.io/no-provisioner
-volumeBindingMode: WaitForFirstConsumer
-
----
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: orange-pv-cka07-str
-spec:
-  capacity:
-    storage: 150Mi
-  accessModes:
-  - ReadWriteOnce
-  persistentVolumeReclaimPolicy: Retain
-  storageClassName: orange-stc-cka07-str
-  local:
-    path: /opt/orange-data-cka07-str
-  nodeAffinity:
-    required:
-      nodeSelectorTerms:
-      - matchExpressions:
-        - key: kubernetes.io/hostname
-          operator: In
-          values:
-          - cluster1-controlplane
-
----
-kind: PersistentVolumeClaim
-apiVersion: v1
-metadata:
-  name: orange-pvc-cka07-str
-spec:
-  accessModes:
-  - ReadWriteOnce
-  storageClassName: orange-stc-cka07-str
-  volumeName: orange-pv-cka07-str
-  resources:
-    requests:
-      storage: 128Mi
+    kind: StorageClass
+    apiVersion: storage.k8s.io/v1
+    metadata:
+      name: orange-stc-cka07-str
+    provisioner: kubernetes.io/no-provisioner
+    volumeBindingMode: WaitForFirstConsumer
+    
+    ---
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: orange-pv-cka07-str
+    spec:
+      capacity:
+        storage: 150Mi
+      accessModes:
+      - ReadWriteOnce
+      persistentVolumeReclaimPolicy: Retain
+      storageClassName: orange-stc-cka07-str
+      local:
+        path: /opt/orange-data-cka07-str
+      nodeAffinity:
+        required:
+          nodeSelectorTerms:
+          - matchExpressions:
+            - key: kubernetes.io/hostname
+              operator: In
+              values:
+              - cluster1-controlplane
+    
+    ---
+    kind: PersistentVolumeClaim
+    apiVersion: v1
+    metadata:
+      name: orange-pvc-cka07-str
+    spec:
+      accessModes:
+      - ReadWriteOnce
+      storageClassName: orange-stc-cka07-str
+      volumeName: orange-pv-cka07-str
+      resources:
+        requests:
+          storage: 128Mi
 
 Apply the template:
-kubectl apply -f <template-file-name>.yaml
+    kubectl apply -f <template-file-name>.yaml
 
 Details
 
 
 
-Q. 7
+# Q. 7
 
 Task
 SECTION: TROUBLESHOOTING
@@ -376,7 +376,7 @@ kubectl config use-context cluster4
 
 There is a pod called pink-pod-cka16-trb created in the default namespace in cluster4. This app runs on port tcp/5000 and it is to be exposed to end-users using an ingress resource called pink-ing-cka16-trb in such a way that it is supposed to be accessible using the command: curl http://kodekloud-pink.app on cluster4-controlplane host. There is an ingress.yaml file under root folder in cluster4-controlplane create an ingress resource by following the command and continue with task.
 
-kubectl create -f ingress.yaml
+    kubectl create -f ingress.yaml
 
 
 
@@ -389,45 +389,45 @@ Note: You should be able to ssh into the cluster4-controlplane using ssh cluster
 
 Solution
 SSH into the cluster4-controlplane host
-ssh cluster4-controlplane
+    ssh cluster4-controlplane
 
 create ingress with the given yaml file.ingress.yaml
 
-kubectl create -f ingress.yaml
+    kubectl create -f ingress.yaml  
 
 Now try to access the app.
 
-curl kodekloud-pink.app
+    curl kodekloud-pink.app
 
 You must be getting 503 Service Temporarily Unavailable error.
 Let's look into the service:
 
-kubectl edit svc pink-svc-cka16-trb
+    kubectl edit svc pink-svc-cka16-trb
 
 Under ports: change protocol: UDP to protocol: TCP
 Try to access the app again
 
-curl kodekloud-pink.app
+    curl kodekloud-pink.app
 
 You must be getting curl: (6) Could not resolve host: example.com error, from the error we can see that its not able to resolve example.com host which indicated that it can be some issue related to the DNS. As we know CoreDNS is a DNS server that can serve as the Kubernetes cluster DNS, so it can be something related to CoreDNS.
 
 Let's check if we have CoreDNS deployment running:
 
-kubectl get deploy -n kube-system
+    kubectl get deploy -n kube-system
 
 You will see that for coredns all relicas are down, you will see 0/0 ready pods. So let's scale up this deployment.
 
-kubectl scale --replicas=2 deployment coredns -n kube-system
+    kubectl scale --replicas=2 deployment coredns -n kube-system
 
 Once CoreDNS is up let's try to access to app again.
 
-curl kodekloud-pink.app
+    curl kodekloud-pink.app
 
 It should work now.
 
 Details
 
-Q. 8
+# Q. 8
 
 Task
 SECTION: ARCHITECTURE, INSTALL AND MAINTENANCE
@@ -436,7 +436,7 @@ SECTION: ARCHITECTURE, INSTALL AND MAINTENANCE
 For this question, please set the context to cluster1 by running:
 
 
-kubectl config use-context cluster1
+    kubectl config use-context cluster1
 
 
 
@@ -446,25 +446,25 @@ A pod named beta-pod-cka01-arch has been created in the beta-cka01-arch namespac
 Solution
 Run the below commands:
 
-student-node ~ ➜  kubectl -n beta-cka01-arch logs beta-pod-cka01-arch --context cluster1 | grep ERROR > /root/beta-pod-cka01-arch_errors
+    student-node ~ ➜  kubectl -n beta-cka01-arch logs beta-pod-cka01-arch --context cluster1 | grep ERROR > /root/beta-pod-cka01-arch_errors
 
-student-node ~ ➜  head /root/beta-pod-cka01-arch_errors
-ERROR: Sat Jul 23 02:49:28 UTC 2022 Logger encountered errors!
-ERROR: Sat Jul 23 02:49:32 UTC 2022 Logger encountered errors!
-ERROR: Sat Jul 23 02:49:36 UTC 2022 Logger encountered errors!
-ERROR: Sat Jul 23 02:49:40 UTC 2022 Logger encountered errors!
-ERROR: Sat Jul 23 02:49:44 UTC 2022 Logger encountered errors!
-ERROR: Sat Jul 23 02:49:48 UTC 2022 Logger encountered errors!
-ERROR: Sat Jul 23 02:49:52 UTC 2022 Logger encountered errors!
-ERROR: Sat Jul 23 02:49:56 UTC 2022 Logger encountered errors!
-ERROR: Sat Jul 23 02:50:00 UTC 2022 Logger encountered errors!
-ERROR: Sat Jul 23 02:50:04 UTC 2022 Logger encountered errors!
-
-student-node ~ ➜ 
+    student-node ~ ➜  head /root/beta-pod-cka01-arch_errors
+    ERROR: Sat Jul 23 02:49:28 UTC 2022 Logger encountered errors!
+    ERROR: Sat Jul 23 02:49:32 UTC 2022 Logger encountered errors!
+    ERROR: Sat Jul 23 02:49:36 UTC 2022 Logger encountered errors!
+    ERROR: Sat Jul 23 02:49:40 UTC 2022 Logger encountered errors!
+    ERROR: Sat Jul 23 02:49:44 UTC 2022 Logger encountered errors!
+    ERROR: Sat Jul 23 02:49:48 UTC 2022 Logger encountered errors!
+    ERROR: Sat Jul 23 02:49:52 UTC 2022 Logger encountered errors!
+    ERROR: Sat Jul 23 02:49:56 UTC 2022 Logger encountered errors!
+    ERROR: Sat Jul 23 02:50:00 UTC 2022 Logger encountered errors!
+    ERROR: Sat Jul 23 02:50:04 UTC 2022 Logger encountered errors!
+    
+    student-node ~ ➜ 
 
 Details
 
-Q. 9
+# Q. 9
 
 Task
 SECTION: SERVICE NETWORKING
@@ -491,37 +491,37 @@ Solution
 Test if the service curlme-cka01-svcn is accessible from pod curlpod-cka01-svcn or not.
 
 
-kubectl exec curlpod-cka01-svcn -- curl curlme-cka01-svcn
-
-.....
-  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                 Dload  Upload   Total   Spent    Left  Speed
-  0     0    0     0    0     0      0      0 --:--:--  0:00:10 --:--:--     0
-
+    kubectl exec curlpod-cka01-svcn -- curl curlme-cka01-svcn
+    
+    .....
+      % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                     Dload  Upload   Total   Spent    Left  Speed
+      0     0    0     0    0     0      0      0 --:--:--  0:00:10 --:--:--     0
+    
 
 
 
 We did not get any response. Check if the service is properly configured or not.
 
 
-kubectl describe svc curlme-cka01-svcn ''
-
-....
-Name:              curlme-cka01-svcn
-Namespace:         default
-Labels:            <none>
-Annotations:       <none>
-Selector:          run=curlme-ckaO1-svcn
-Type:              ClusterIP
-IP Family Policy:  SingleStack
-IP Families:       IPv4
-IP:                10.109.45.180
-IPs:               10.109.45.180
-Port:              <unset>  80/TCP
-TargetPort:        80/TCP
-Endpoints:         <none>
-Session Affinity:  None
-Events:            <none>
+    kubectl describe svc curlme-cka01-svcn ''
+    
+    ....
+    Name:              curlme-cka01-svcn
+    Namespace:         default
+    Labels:            <none>
+    Annotations:       <none>
+    Selector:          run=curlme-ckaO1-svcn
+    Type:              ClusterIP
+    IP Family Policy:  SingleStack
+    IP Families:       IPv4
+    IP:                10.109.45.180
+    IPs:               10.109.45.180
+    Port:              <unset>  80/TCP
+    TargetPort:        80/TCP
+    Endpoints:         <none>
+    Session Affinity:  None
+    Events:            <none>
 
 
 
@@ -533,40 +533,40 @@ You can create the service using imperative way or declarative way.
 
 
 Using imperative command:
-kubectl expose pod curlme-cka01-svcn --port=80
+    kubectl expose pod curlme-cka01-svcn --port=80
 
 
 
 Using declarative manifest:
 
 
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    run: curlme-cka01-svcn
-  name: curlme-cka01-svcn
-spec:
-  ports:
-  - port: 80
-    protocol: TCP
-    targetPort: 80
-  selector:
-    run: curlme-cka01-svcn
-  type: ClusterIP
-
+    apiVersion: v1
+    kind: Service
+    metadata:
+      labels:
+        run: curlme-cka01-svcn
+      name: curlme-cka01-svcn
+    spec:
+      ports:
+      - port: 80
+        protocol: TCP
+        targetPort: 80
+      selector:
+        run: curlme-cka01-svcn
+      type: ClusterIP
+    
 
 
 
 You can test the connection from curlpod-cka-1-svcn using following.
 
 
-kubectl exec curlpod-cka01-svcn -- curl curlme-cka01-svcn
+    kubectl exec curlpod-cka01-svcn -- curl curlme-cka01-svcn
 
 Details
 
 
-Q. 10
+# Q. 10
 
 Task
 SECTION: SCHEDULING
@@ -584,7 +584,7 @@ We have deployed a 2-tier web application on the cluster3 nodes in the canara-wl
 
 You can check the status of the application from the terminal by running the curl command with the following syntax:
 
-curl http://cluster3-controlplane:NODE-PORT
+    curl http://cluster3-controlplane:NODE-PORT
 
 
 
@@ -592,9 +592,9 @@ curl http://cluster3-controlplane:NODE-PORT
 
 To make the application work, create a new secret called db-secret-wl05 with the following key values: -
 
-1. DB_Host=mysql-svc-wl05
-2. DB_User=root
-3. DB_Password=password123
+    1. DB_Host=mysql-svc-wl05
+    2. DB_User=root
+    3. DB_Password=password123
 
 
 
@@ -609,26 +609,26 @@ You can SSH into the cluster3 using ssh cluster3-controlplane command.
 Solution
 Set the correct context: -
 
-kubectl config use-context cluster3
+    kubectl config use-context cluster3
 
 List the nodes: -
 
-kubectl get nodes -o wide
+    kubectl get nodes -o wide
 
 Run the curl command to know the status of the application as follows: -
 
-ssh cluster3-controlplane
+    ssh cluster3-controlplane
 
-curl http://10.17.63.11:31020
-<!doctype html>
-<title>Hello from Flask</title>
-...
+    curl http://10.17.63.11:31020
+    <!doctype html>
+    <title>Hello from Flask</title>
+    ...
 
     <img src="/static/img/failed.png">
     <h3> Failed connecting to the MySQL database. </h3>
 
 
-    <h2> Environment Variables: DB_Host=Not Set; DB_Database=Not Set; DB_User=Not Set; DB_Password=Not Set; 2003: Can&#39;t connect to MySQL server on &#39;localhost:3306&#39; (111 Connection refused) </h2>
+        <h2> Environment Variables: DB_Host=Not Set; DB_Database=Not Set; DB_User=Not Set; DB_Password=Not Set; 2003: Can&#39;t connect to MySQL server on &#39;localhost:3306&#39; (111 Connection refused) </h2>
 
 
 
@@ -641,52 +641,52 @@ NOTE: - In your lab, IP addresses could be different.
 
 Let's create a new secret called db-secret-wl05 as follows: -
 
-kubectl create secret generic db-secret-wl05 -n canara-wl05 --from-literal=DB_Host=mysql-svc-wl05 --from-literal=DB_User=root --from-literal=DB_Password=password123
+    kubectl create secret generic db-secret-wl05 -n canara-wl05 --from-literal=DB_Host=mysql-svc-wl05 --from-literal=DB_User=root --from-literal=DB_Password=password123
 
 After that, configure the newly created secret to the web application pod as follows: -
 
----
-apiVersion: v1
-kind: Pod
-metadata:
-  labels:
-    run: webapp-pod-wl05
-  name: webapp-pod-wl05
-  namespace: canara-wl05
-spec:
-  containers:
-  - image: kodekloud/simple-webapp-mysql
-    name: webapp-pod-wl05
-    envFrom:
-    - secretRef:
-        name: db-secret-wl05
+    ---
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      labels:
+        run: webapp-pod-wl05
+      name: webapp-pod-wl05
+      namespace: canara-wl05
+    spec:
+      containers:
+      - image: kodekloud/simple-webapp-mysql
+        name: webapp-pod-wl05
+        envFrom:
+        - secretRef:
+            name: db-secret-wl05
 
 then use the kubectl replace command: -
 
-kubectl replace -f <FILE-NAME> --force
+    kubectl replace -f <FILE-NAME> --force
 
 
 
 In the end, make use of the curl command to check the status of the application pod. The status of the application should be success.
 
-curl http://10.17.63.11:31020
+    curl http://10.17.63.11:31020
 
-<!doctype html>
-<title>Hello from Flask</title>
-<body style="background: #39b54b;"></body>
-<div style="color: #e4e4e4;
-    text-align:  center;
-    height: 90px;
-    vertical-align:  middle;">
-
-
-    <img src="/static/img/success.jpg">
-    <h3> Successfully connected to the MySQL database.</h3>
+    <!doctype html>
+    <title>Hello from Flask</title>
+    <body style="background: #39b54b;"></body>
+    <div style="color: #e4e4e4;
+        text-align:  center;
+        height: 90px;
+        vertical-align:  middle;">
+    
+    
+        <img src="/static/img/success.jpg">
+        <h3> Successfully connected to the MySQL database.</h3>
 
 Details
 
 
-Q. 11
+# Q. 11
 
 Task
 SECTION: TROUBLESHOOTING
@@ -715,7 +715,7 @@ Note: After updating system pods might take a little time to come in running sta
 You can SSH into the cluster4 using ssh cluster4-controlplane command.
 SSH Password for host cluster4-controlplane is C0ntr0lplan3Pa$$wd
 
-Q. 12
+# Q. 12
 
 Task
 SECTION: TROUBLESHOOTING
@@ -739,24 +739,24 @@ Note: You should be able to ssh into the cluster1-controlplane using ssh cluster
 
 Solution
 SSH into cluster1-controlplane
-ssh cluster1-controlplane
+    ssh cluster1-controlplane
 
 Try to access the app using curl http://kodekloud-ingress.app command. You will see 404 Not Found error.
 
 Look into the ingress to make sure its configued properly.
 
-kubectl get ingress
-kubectl edit ingress nodeapp-ing-cka08-trb
+    kubectl get ingress
+    kubectl edit ingress nodeapp-ing-cka08-trb
 
-Under rules: -> host: change example.com to kodekloud-ingress.app
-Under backend: -> service: -> name: Change example-service to nodeapp-svc-cka08-trb
-Change port: -> number: from 80 to 3000
-You should be able to access the app using curl http://kodekloud-ingress.app command now.
+    Under rules: -> host: change example.com to kodekloud-ingress.app
+    Under backend: -> service: -> name: Change example-service to nodeapp-svc-cka08-trb
+    Change port: -> number: from 80 to 3000
+    You should be able to access the app using curl http://kodekloud-ingress.app command now.
 
 Details
 
 
-Q. 13
+# Q. 13
 
 Task
 SECTION: SERVICE NETWORKING
@@ -784,18 +784,18 @@ kubectl config use-context cluster3
 On student node run the command:
 
 
-student-node ~ ➜  kubectl expose -n app-space deployment webapp-wear-cka09-svcn --type=LoadBalancer --name=wear-service-cka09-svcn --port=8080
-service/wear-service-cka09-svcn exposed
-
-student-node ~ ➜  k get svc -n app-space
-NAME                      TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
-wear-service-cka09-svcn   LoadBalancer   10.43.68.233   172.25.0.14   8080:32109/TCP   14s
+    student-node ~ ➜  kubectl expose -n app-space deployment webapp-wear-cka09-svcn --type=LoadBalancer --name=wear-service-cka09-svcn --port=8080
+    service/wear-service-cka09-svcn exposed
+    
+    student-node ~ ➜  k get svc -n app-space
+    NAME                      TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+    wear-service-cka09-svcn   LoadBalancer   10.43.68.233   172.25.0.14   8080:32109/TCP   14s
 
 Details
 
 
 
-Q. 14
+# Q. 14
 
 Task
 SECTION: STORAGE
@@ -815,24 +815,24 @@ Solution
 Set context to cluster1.
 
 Create a yaml template as below:
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: red-pv-cka03-str
-spec:
-  capacity:
-    storage: 100Mi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: /opt/red-pv-cka03-str
+    apiVersion: v1
+    kind: PersistentVolume
+    metadata:
+      name: red-pv-cka03-str
+    spec:
+      capacity:
+        storage: 100Mi
+      accessModes:
+        - ReadWriteOnce
+      hostPath:
+        path: /opt/red-pv-cka03-str
 
 Apply the template:
-kubectl apply -f <template-file-name>.yaml
+    kubectl apply -f <template-file-name>.yaml
 
 Details
 
-Q. 15
+# Q. 15
 
 Task
 SECTION: SERVICE NETWORKING
@@ -865,11 +865,13 @@ kubectl config use-context cluster3
 
 
 
-On student-node, use the command kubectl run messaging-cka07-svcn --image=redis:alpine -l tier=msg
+On student-node, use the command 
+    kubectl run messaging-cka07-svcn --image=redis:alpine -l tier=msg
 
 
 
-Now run the command: kubectl expose pod messaging-cka07-svcn --port=6379 --name messaging-service-cka07-svcn
+Now run the command: 
+    kubectl expose pod messaging-cka07-svcn --port=6379 --name messaging-service-cka07-svcn
 
 Details
 
@@ -879,7 +881,7 @@ Details
 
 
 
-Q. 16
+# Q. 16
 
 Task
 SECTION: TROUBLESHOOTING
@@ -902,15 +904,15 @@ Note: Make sure etcd listens at its default port. Also you can SSH to the cluste
 
 Solution
 SSH into cluster4-controlplane host.
-ssh cluster4-controlplane
+    ssh cluster4-controlplane
 
 Let's take etcd backup
 
-ETCDCTL_API=3 etcdctl --endpoints=https://[127.0.0.1]:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key snapshot save /opt/etcd-boot-cka18-trb.db
+    ETCDCTL_API=3 etcdctl --endpoints=https://[127.0.0.1]:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key snapshot save /opt/etcd-boot-cka18-trb.db
 
 It might stuck for forever, let's see why that would happen. Try to list the PODs first
 
-kubectl get pod -A
+    kubectl get pod -A
 
 There might an error like
 
@@ -918,37 +920,37 @@ The connection to the server cluster4-controlplane:6443 was refused - did you sp
 
 There seems to be some issue with the cluster so let's look into the logs
 
-journalctl -u kubelet -f
+    journalctl -u kubelet -f
 
 You will see a lot of connect: connection refused erros but that must be because the different cluster components are not able to connect to the api server so try to filter out these logs to look more closly
 
-journalctl -u kubelet -f | grep -v 'connect: connection refused'
+    journalctl -u kubelet -f | grep -v 'connect: connection refused'
 
 You should see some erros as below
 
-cluster4-controlplane kubelet[2240]: E0923 04:38:15.630925    2240 file.go:187] "Could not process manifest file" err="invalid pod: [spec.containers[0].volumeMounts[1].name: Not found: \"etcd-cert\"]" path="/etc/kubernetes/manifests/etcd.yaml"
+    cluster4-controlplane kubelet[2240]: E0923 04:38:15.630925    2240 file.go:187] "Could not process manifest file" err="invalid pod: [spec.containers[0].volumeMounts[1].name: Not found: \"etcd-cert\"]" path="/etc/kubernetes/manifests/etcd.yaml"
 
 So seems like there is some incorrect volume which etcd is trying to mount, let's look into the etcd manifest.
 
-vi /etc/kubernetes/manifests/etcd.yaml 
+    vi /etc/kubernetes/manifests/etcd.yaml 
 
 Search for etcd-cert, you will notice that the volume name is etcd-certs but the volume mount is trying to mount etcd-cert volume which is incorrect. Fix the volume mount name and save the changes. Let's restart kubelet service after that.
 
-systemctl restart kubelet
+    systemctl restart kubelet
 
 Wait for few minutes to see if its good now.
 
-kubectl get pod -A
+    kubectl get pod -A
 
 You should be able to list the PODs now, let's try to take etcd backup now:
 
-ETCDCTL_API=3 etcdctl --endpoints=https://[127.0.0.1]:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key snapshot save /opt/etcd-boot-cka18-trb.db
+    ETCDCTL_API=3 etcdctl --endpoints=https://[127.0.0.1]:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key snapshot save /opt/etcd-boot-cka18-trb.db
 
 It should work now.
 
 Details
 
-Q. 17
+# Q. 17
 
 Task
 SECTION: STORAGE
@@ -968,20 +970,20 @@ Solution
 Set context to cluster1:
 
 Create a yaml template as below:
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: apple-pvc-cka04-str
-spec:
-  volumeName: apple-pv-cka04-str
-  storageClassName: manual
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 40Mi
+    apiVersion: v1
+    kind: PersistentVolumeClaim
+    metadata:
+      name: apple-pvc-cka04-str
+    spec:
+      volumeName: apple-pv-cka04-str
+      storageClassName: manual
+      accessModes:
+        - ReadWriteOnce
+      resources:
+        requests:
+          storage: 40Mi
 
 Apply the template:
-kubectl apply -f <template-file-name>.yaml
+    kubectl apply -f <template-file-name>.yaml
 
 Details
