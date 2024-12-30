@@ -68,6 +68,7 @@ Since you're restricting the service account from cluster-wide access to namespa
     kubectl delete clusterrolebinding blue-role-binding-cka21-arch
 
 Create a Role that specifically allows get operations on pods within the default namespace:
+
     apiVersion: rbac.authorization.k8s.io/v1
     kind: Role
     metadata:
@@ -78,11 +79,12 @@ Create a Role that specifically allows get operations on pods within the default
       resources: ["pods"]
       verbs: ["get"]
     
-    Save this to a file named role.yaml and apply it with:
+Save this to a file named role.yaml and apply it with:
     
     kubectl apply -f role.yaml
 
-    Bind the service account to the new role using a RoleBinding. This grants the service account the permissions defined in the role, but only within the default namespace:
+ Bind the service account to the new role using a RoleBinding. This grants the service account the permissions defined in the role, but only within the default namespace:
+ 
     apiVersion: rbac.authorization.k8s.io/v1
     kind: RoleBinding
     metadata:
