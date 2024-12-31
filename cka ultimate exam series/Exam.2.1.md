@@ -312,7 +312,9 @@ Finally, create a persistent volume claim called orange-pvc-cka07-str as per the
     - The volume should be orange-pv-cka07-str.
 
 Solution
+----
 Create a yaml file as below:
+
     kind: StorageClass
     apiVersion: storage.k8s.io/v1
     metadata:
