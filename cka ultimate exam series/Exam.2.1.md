@@ -126,7 +126,7 @@ A pod called color-app-cka13-arch has been created in the default namespace. Thi
 Solution
 Export the current pod definition:
 
-    student-node ~ ➜  kubectl get pod color-app-cka13-arch -o yaml > /tmp/color-app-cka13-arch.yaml
+    student-node ~ ➜  kubectl get pod color-app-cka13-arch -o yaml > /tmp/color-app-cka13-arch.yaml 
 
 
 
