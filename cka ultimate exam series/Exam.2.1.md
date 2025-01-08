@@ -1016,6 +1016,7 @@ Solution
 Set context to cluster1:
 
 Create a yaml template as below:
+
     apiVersion: v1
     kind: PersistentVolumeClaim
     metadata:
@@ -1030,6 +1031,7 @@ Create a yaml template as below:
           storage: 40Mi
 
 Apply the template:
+
     kubectl apply -f <template-file-name>.yaml
 
 Details
