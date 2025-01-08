@@ -859,6 +859,7 @@ Solution
 Set context to cluster1.
 
 Create a yaml template as below:
+
     apiVersion: v1
     kind: PersistentVolume
     metadata:
@@ -872,6 +873,7 @@ Create a yaml template as below:
         path: /opt/red-pv-cka03-str
 
 Apply the template:
+
     kubectl apply -f <template-file-name>.yaml
 
 Details
