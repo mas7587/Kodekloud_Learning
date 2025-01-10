@@ -484,6 +484,7 @@ kubectl apply -f hr-web-app-service-cka08-svcn.yaml
 ```
 ```
 ```markdown
+
 # Q. 12
 
 ## Task
