@@ -129,21 +129,22 @@ Please ensure the format as shown below:
 
 
 
-POD_NAME        IP_ADDR
-pod-1           ip-1
-pod-3           ip-2
-pod-2           ip-3
-...
+  POD_NAME        IP_ADDR
+  pod-1           ip-1
+  pod-3           ip-2
+  pod-2           ip-3
+  ...
 
 
 
 
 Solution
+
 Switching to cluster3:
 
 
 
-kubectl config use-context cluster3
+  kubectl config use-context cluster3
 
 
 
@@ -152,14 +153,14 @@ The easiest way to route traffic to a specific pod is by the use of labels and s
 
 
 
-student-node ~ ➜  kubectl get pods --show-labels -n spectra-1267
-NAME     READY   STATUS    RESTARTS   AGE     LABELS
-pod-12   1/1     Running   0          5m21s   env=dev,mode=standard,type=external
-pod-34   1/1     Running   0          5m20s   env=dev,mode=standard,type=internal
-pod-43   1/1     Running   0          5m20s   env=prod,mode=exam,type=internal
-pod-23   1/1     Running   0          5m21s   env=dev,mode=exam,type=external
-pod-32   1/1     Running   0          5m20s   env=prod,mode=standard,type=internal
-pod-21   1/1     Running   0          5m20s   env=prod,mode=exam,type=external
+  student-node ~ ➜  kubectl get pods --show-labels -n spectra-1267
+  NAME     READY   STATUS    RESTARTS   AGE     LABELS
+  pod-12   1/1     Running   0          5m21s   env=dev,mode=standard,type=external
+  pod-34   1/1     Running   0          5m20s   env=dev,mode=standard,type=internal
+  pod-43   1/1     Running   0          5m20s   env=prod,mode=exam,type=internal
+  pod-23   1/1     Running   0          5m21s   env=dev,mode=exam,type=external
+  pod-32   1/1     Running   0          5m20s   env=prod,mode=standard,type=internal
+  pod-21   1/1     Running   0          5m20s   env=prod,mode=exam,type=external
 
 
 
@@ -172,10 +173,10 @@ As we can see both the required pods have labels mode=exam,type=external in comm
 
 
 
-student-node ~ ➜  kubectl get pod -l mode=exam,type=external -n spectra-1267                                    
-NAME     READY   STATUS    RESTARTS   AGE
-pod-23   1/1     Running   0          9m18s
-pod-21   1/1     Running   0          9m17s
+  student-node ~ ➜  kubectl get pod -l mode=exam,type=external -n spectra-1267                                    
+  NAME     READY   STATUS    RESTARTS   AGE
+  pod-23   1/1     Running   0          9m18s
+  pod-21   1/1     Running   0          9m17s
 
 
 
@@ -184,7 +185,7 @@ Nice!! Now as we have figured out the labels, we can proceed further with the cr
 
 
 
-student-node ~ ➜  kubectl create service clusterip service-3421-svcn -n spectra-1267 --tcp=8080:80 --dry-run=client -o yaml > service-3421-svcn.yaml
+  student-node ~ ➜  kubectl create service clusterip service-3421-svcn -n spectra-1267 --tcp=8080:80 --dry-run=client -o yaml > service-3421-svcn.yaml
 
 
 
@@ -193,28 +194,28 @@ Now modify the service definition with selectors as required before applying to 
 
 
 
-student-node ~ ➜  cat service-3421-svcn.yaml 
-apiVersion: v1
-kind: Service
-metadata:
-  creationTimestamp: null
-  labels:
-    app: service-3421-svcn
-  name: service-3421-svcn
-  namespace: spectra-1267
-spec:
-  ports:
-  - name: 8080-80
-    port: 8080
-    protocol: TCP
-    targetPort: 80
-  selector:
-    app: service-3421-svcn  # delete 
-    mode: exam    # add
-    type: external  # add
-  type: ClusterIP
-status:
-  loadBalancer: {}
+  student-node ~ ➜  cat service-3421-svcn.yaml 
+  apiVersion: v1
+  kind: Service
+  metadata:
+    creationTimestamp: null
+    labels:
+      app: service-3421-svcn
+    name: service-3421-svcn
+    namespace: spectra-1267
+  spec:
+    ports:
+    - name: 8080-80
+      port: 8080
+      protocol: TCP
+      targetPort: 80
+    selector:
+      app: service-3421-svcn  # delete 
+      mode: exam    # add
+      type: external  # add
+    type: ClusterIP
+  status:
+    loadBalancer: {}
 
 
 
@@ -223,13 +224,13 @@ Finally let's apply the service definition:
 
 
 
-student-node ~ ➜  kubectl apply -f service-3421-svcn.yaml
-service/service-3421 created
-
-student-node ~ ➜  k get ep service-3421-svcn -n spectra-1267
-NAME           ENDPOINTS                     AGE
-service-3421   10.42.0.15:80,10.42.0.17:80   52s
-
+  student-node ~ ➜  kubectl apply -f service-3421-svcn.yaml
+  service/service-3421 created
+  
+  student-node ~ ➜  k get ep service-3421-svcn -n spectra-1267
+  NAME           ENDPOINTS                     AGE
+  service-3421   10.42.0.15:80,10.42.0.17:80   52s
+  
 
 
 
@@ -237,17 +238,18 @@ To store all the pod name along with their IP's , we could use imperative comman
 
 
 
-student-node ~ ➜  kubectl get pods -n spectra-1267 -o=custom-columns='POD_NAME:metadata.name,IP_ADDR:status.podIP' --sort-by=.status.podIP
-
-POD_NAME   IP_ADDR
-pod-12     10.42.0.18
-pod-23     10.42.0.19
-pod-34     10.42.0.20
-pod-21     10.42.0.21
-...
+  student-node ~ ➜  kubectl get pods -n spectra-1267 -o=custom-columns='POD_NAME:metadata.name,IP_ADDR:status.podIP' --sort-by=.status.podIP
+  
+  POD_NAME   IP_ADDR
+  pod-12     10.42.0.18
+  pod-23     10.42.0.19
+  pod-34     10.42.0.20
+  pod-21     10.42.0.21
+  ...
 
 ### store the output to /root/pod_ips
-student-node ~ ➜  kubectl get pods -n spectra-1267 -o=custom-columns='POD_NAME:metadata.name,IP_ADDR:status.podIP' --sort-by=.status.podIP > /root/pod_ips_cka05_svcn
+
+  student-node ~ ➜  kubectl get pods -n spectra-1267 -o=custom-columns='POD_NAME:metadata.name,IP_ADDR:status.podIP' --sort-by=.status.podIP > /root/pod_ips_cka05_svcn
 
 Details
 
