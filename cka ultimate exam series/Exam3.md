@@ -72,17 +72,19 @@ NOTE: It's recommended to wait for a few minutes to allow deployed objects to be
 Solution
 Check out the metrics for all pods across all clusters:
 
-    student-node ~ ➜  kubectl top pods -A --context cluster1 --no-headers | sort -nr -k4 | head -1
-    kube-system       kube-apiserver-cluster1-controlplane            48m   262Mi   
-    
-    student-node ~ ➜  kubectl top pods -A --context cluster2 --no-headers | sort -nr -k4 | head -1
-    kube-system   kube-apiserver-cluster2-controlplane            44m   258Mi   
-    
-    student-node ~ ➜  kubectl top pods -A --context cluster3 --no-headers | sort -nr -k4 | head -1
-    default       backend-cka06-arch                        205m   596Mi   
-    
-    student-node ~ ➜  kubectl top pods -A --context cluster4 --no-headers | sort -nr -k4 | head -1
-    kube-system   kube-apiserver-cluster4-controlplane            43m   266Mi   
+
+     student-node ~ ➜  kubectl top pods -A --context cluster1 --no-headers | sort -nr -k4 | head -1
+     kube-system       kube-apiserver-cluster1-controlplane            48m   262Mi   
+     
+     student-node ~ ➜  kubectl top pods -A --context cluster2 --no-headers | sort -nr -k4 | head -1
+     kube-system   kube-apiserver-cluster2-controlplane            44m   258Mi   
+     
+     student-node ~ ➜  kubectl top pods -A --context cluster3 --no-headers | sort -nr -k4 | head -1
+     default       backend-cka06-arch                        205m   596Mi   
+     
+     student-node ~ ➜  kubectl top pods -A --context cluster4 --no-headers | sort -nr -k4 | head -1
+     kube-system   kube-apiserver-cluster4-controlplane            43m   266Mi   
+     
 
 student-node ~ ➜  
 
@@ -128,12 +130,11 @@ Store the pod names and their ip addresses from the spectra-1267 ns at /root/pod
 Please ensure the format as shown below:
 
 
-
   POD_NAME        IP_ADDR
   pod-1           ip-1
   pod-3           ip-2
   pod-2           ip-3
-  ...
+  
 
 
 
