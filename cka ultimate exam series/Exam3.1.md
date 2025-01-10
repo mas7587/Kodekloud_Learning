@@ -1,4 +1,4 @@
-```markdown
+
 # Q. 1
 ## Task
 ### SECTION: SCHEDULING
@@ -482,8 +482,7 @@ Modify the generated file to add the `nodePort` field with the given port number
 ```bash
 kubectl apply -f hr-web-app-service-cka08-svcn.yaml
 ```
-```
-```markdown
+
 
 # Q. 12
 
