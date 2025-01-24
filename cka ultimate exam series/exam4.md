@@ -537,3 +537,705 @@ curl http://cluster1-controlplane:30005
 Boom! app should be accessible now.
 
 Details
+
+
+#
+
+Q. 11
+
+Task
+SECTION: TROUBLESHOOTING
+
+
+For this question, please set the context to cluster1 by running:
+
+
+kubectl config use-context cluster1
+
+
+
+A YAML template for a Kubernetes deployment is stored at /root/app-cka07-trb.yaml. However, creating a deployment using this file is failing. Investigate the cause of the errors and fix the issue.
+Make sure that the pod is in running state once deployed.
+
+
+Note: Do not to make any changes in the template file.
+
+Solution
+Try to apply the template:
+kubectl apply -f /root/app-cka07-trb.yaml
+
+You will see an error something like:
+
+Error from server (NotFound): error when creating "/root/app-cka07-trb.yaml": namespaces "app-cka07-trb" not found
+Error from server (NotFound): error when creating "/root/app-cka07-trb.yaml": namespaces "app-cka07-trb" not found
+
+From the error you can see that its looking for app-cka07-trb namespace so let's find out if this namespace exists:
+
+kubectl get ns
+
+You will not see this namespace in the list so let's create it.
+
+Create the namespace
+kubectl create ns app-cka07-trb
+
+Apply the template
+kubectl apply -f /root/app-cka07-trb.yaml
+
+Verify the POD is up
+kubectl get pod -n app-cka07-trb
+
+Details
+
+Q. 12
+
+Task
+SECTION: TROUBLESHOOTING
+
+
+For this question, please set the context to cluster1 by running:
+
+
+kubectl config use-context cluster1
+
+
+
+A pod called check-time-cka03-trb is continuously crashing. Figure out what is causing this and fix it.
+
+
+
+
+Make sure that the check-time-cka03-trb POD is in running state.
+
+This pod prints the current date and time at a pre-defined frequency and saves it to a file. Ensure that it continues this operation once you have fixed it.
+
+Solution
+Look into the POD logs
+kubectl logs -f check-time-cka03-trb
+
+You may not see any logs so look into the kubernetes events for check-time-cka03-trb POD
+
+Look into the POD events
+
+kubectl get event --field-selector involvedObject.name=check-time-cka03-trb
+
+You will see an error something like:
+
+Error: failed to create containerd task: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: exec: "/bin/bash": stat /bin/bash: no such file or directory: unknown
+
+From the error we can see that its not able to execute /bin/bash so let's try /bin/sh
+
+Edit the pod
+kubectl get pod check-time-cka03-trb -o=yaml > check-time-cka03-trb.yaml
+
+Make the required changes in check-time-cka03-trb.yaml template
+vi check-time-cka03-trb.yaml
+
+Under spec: -> containers: -> command: change /bin/bash to /bin/sh and save the file.
+Delete the old pod.
+kubectl delete pod check-time-cka03-trb
+
+Apply the updated template
+kubectl apply -f check-time-cka03-trb.yaml
+
+Details
+
+
+Q. 13
+
+Task
+SECTION: ARCHITECTURE, INSTALL AND MAINTENANCE
+
+
+For this question, please set the context to cluster1 by running:
+
+
+kubectl config use-context cluster1
+
+
+
+An etcd backup is already stored at the path /opt/cluster1_backup_to_restore.db on the cluster1-controlplane node. Use /root/default.etcd as the --data-dir and restore it on the cluster1-controlplane node itself.
+
+
+You can ssh to the controlplane node by running ssh root@cluster1-controlplane from the student-node.
+
+Solution
+SSH into cluster1-controlplane node:
+
+student-node ~ ➜ ssh root@cluster1-controlplane
+
+
+
+
+Install etcd utility (if not installed already) and restore the backup:
+
+cluster1-controlplane ~ ➜ cd /tmp
+cluster1-controlplane ~ ➜ export RELEASE=$(curl -s https://api.github.com/repos/etcd-io/etcd/releases/latest | grep tag_name | cut -d '"' -f 4)
+cluster1-controlplane ~ ➜ wget https://github.com/etcd-io/etcd/releases/download/${RELEASE}/etcd-${RELEASE}-linux-amd64.tar.gz
+cluster1-controlplane ~ ➜ tar xvf etcd-${RELEASE}-linux-amd64.tar.gz ; cd etcd-${RELEASE}-linux-amd64
+cluster1-controlplane ~ ➜ mv etcd etcdctl  /usr/local/bin/
+cluster1-controlplane ~ ➜ etcdctl snapshot restore --data-dir /root/default.etcd /opt/cluster1_backup_to_restore.db 
+
+Details
+
+Q. 14
+
+Task
+SECTION: SCHEDULING
+
+
+For this question, please set the context to cluster3 by running:
+
+
+kubectl config use-context cluster3
+
+
+
+We have deployed a 2-tier web application on the cluster3 nodes in the canara-wl05 namespace. However, at the moment, the web app pod cannot establish a connection with the MySQL pod successfully.
+
+
+You can check the status of the application from the terminal by running the curl command with the following syntax:
+
+curl http://cluster3-controlplane:NODE-PORT
+
+
+
+
+
+To make the application work, create a new secret called db-secret-wl05 with the following key values: -
+
+1. DB_Host=mysql-svc-wl05
+2. DB_User=root
+3. DB_Password=password123
+
+
+
+Next, configure the web application pod to load the new environment variables from the newly created secret.
+
+
+Note: Check the web application again using the curl command, and the status of the application should be success.
+
+
+You can SSH into the cluster3 using ssh cluster3-controlplane command.
+
+Solution
+Set the correct context: -
+
+kubectl config use-context cluster3
+
+List the nodes: -
+
+kubectl get nodes -o wide
+
+Run the curl command to know the status of the application as follows: -
+
+ssh cluster3-controlplane
+
+curl http://10.17.63.11:31020
+<!doctype html>
+<title>Hello from Flask</title>
+...
+
+    <img src="/static/img/failed.png">
+    <h3> Failed connecting to the MySQL database. </h3>
+
+
+    <h2> Environment Variables: DB_Host=Not Set; DB_Database=Not Set; DB_User=Not Set; DB_Password=Not Set; 2003: Can&#39;t connect to MySQL server on &#39;localhost:3306&#39; (111 Connection refused) </h2>
+
+
+
+As you can see, the status of the application pod is failed.
+
+
+NOTE: - In your lab, IP addresses could be different.
+
+
+
+Let's create a new secret called db-secret-wl05 as follows: -
+
+kubectl create secret generic db-secret-wl05 -n canara-wl05 --from-literal=DB_Host=mysql-svc-wl05 --from-literal=DB_User=root --from-literal=DB_Password=password123
+
+After that, configure the newly created secret to the web application pod as follows: -
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: webapp-pod-wl05
+  name: webapp-pod-wl05
+  namespace: canara-wl05
+spec:
+  containers:
+  - image: kodekloud/simple-webapp-mysql
+    name: webapp-pod-wl05
+    envFrom:
+    - secretRef:
+        name: db-secret-wl05
+
+then use the kubectl replace command: -
+
+kubectl replace -f <FILE-NAME> --force
+
+
+
+In the end, make use of the curl command to check the status of the application pod. The status of the application should be success.
+
+curl http://10.17.63.11:31020
+
+<!doctype html>
+<title>Hello from Flask</title>
+<body style="background: #39b54b;"></body>
+<div style="color: #e4e4e4;
+    text-align:  center;
+    height: 90px;
+    vertical-align:  middle;">
+
+
+    <img src="/static/img/success.jpg">
+    <h3> Successfully connected to the MySQL database.</h3>
+
+Details
+
+
+Q. 15
+
+Task
+SECTION: SCHEDULING
+
+
+For this question, please set the context to cluster1 by running:
+
+
+kubectl config use-context cluster1
+
+
+
+Create a deployment called app-wl01 using the nginx image and scale the application pods to 2.
+
+
+Solution
+Run the command to change the context: -
+
+kubectl config use-context cluster1
+
+
+
+Run the following commands: -
+
+kubectl create deployment app-wl01 --image=nginx --replicas=2
+
+
+
+To cross-verify the deployed resources, run the commands as follows: -
+
+kubectl get pods,deployments
+
+Details
+
+Q. 16
+
+Task
+SECTION: SCHEDULING
+
+
+For this question, please set the context to cluster3 by running:
+
+
+kubectl config use-context cluster3
+
+
+
+One of our applications runs on the cluster3-controlplane node. Due to the possibility of traffic increase, we want to scale the application pods to loadbalance the traffic and provide a smoother user experience.
+
+cluster3-controlplane node has enough resources to deploy more application pods. Scale the deployment called essports-wl02 to 5.
+
+
+Solution
+Set the correct context:
+
+kubectl config use-context cluster3
+
+
+
+Now, get the details of the nodes: -
+
+kubectl get nodes -owide
+
+
+
+then SSH to the given node by the following command: -
+
+ssh cluster3-controlplane
+
+
+
+And run the kubectl scale command as follows: -
+
+kubectl scale deploy essports-wl02 --replicas=5
+
+
+
+OR
+
+
+
+You can run the kubectl scale command from the student node as well: -
+
+kubectl scale deploy essports-wl02 --replicas=5
+
+
+
+Verify the scaled-up pods by kubectl get command: -
+
+kubectl get pods
+
+
+
+The number of pods should be 1 to 5.
+
+Details
+
+Q. 17
+
+Task
+SECTION: SCHEDULING
+
+
+For this question, please set the context to cluster3 by running:
+
+
+kubectl config use-context cluster3
+
+
+
+A manifest file is available at the /root/app-wl03/ on the student-node node. There are some issues with the file; hence couldn't deploy a pod on the cluster3-controlplane node.
+
+After fixing the issues, deploy the pod, and it should be in a running state.
+
+
+NOTE: - Ensure that the existing limits are unchanged.
+
+
+Solution
+Set the correct context: -
+
+kubectl config use-context cluster3
+
+
+
+Use the cd command to move to the given directory: -
+
+cd /root/app-wl03/
+
+While creating the resource, you will see the error output as follows: -
+
+kubectl create -f app-wl03.yaml 
+The Pod "app-wl03" is invalid: spec.containers[0].resources.requests: Invalid value: "1Gi": must be less than or equal to memory limit
+
+In the spec.containers.resources.requests.memory value is not configured as compare to the memory limit.
+
+As a fix, open the manifest file with the text editor such as vim or nano and set the value to 100Mi or less than 100Mi.
+
+It should be look like as follows: -
+
+resources:
+     requests:
+       memory: 100Mi
+     limits:
+       memory: 100Mi
+
+Final, create the resource from the kubectl create command: -
+
+kubectl create -f app-wl03.yaml 
+pod/app-wl03 created
+
+Details
+
+
+Q. 18
+
+Task
+SECTION: SERVICE NETWORKING
+
+
+For this question, please set the context to cluster1 by running:
+
+
+kubectl config use-context cluster1
+
+
+
+John is setting up a two tier application stack that is supposed to be accessible using the service curlme-cka01-svcn. To test that the service is accessible, he is using a pod called curlpod-cka01-svcn. However, at the moment, he is unable to get any response from the application.
+
+
+
+Troubleshoot and fix this issue so the application stack is accessible.
+
+
+
+While you may delete and recreate the service curlme-cka01-svcn, please do not alter it in anyway.
+
+Solution
+Test if the service curlme-cka01-svcn is accessible from pod curlpod-cka01-svcn or not.
+
+
+kubectl exec curlpod-cka01-svcn -- curl curlme-cka01-svcn
+
+.....
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0     0    0     0      0      0 --:--:--  0:00:10 --:--:--     0
+
+
+
+
+We did not get any response. Check if the service is properly configured or not.
+
+
+kubectl describe svc curlme-cka01-svcn ''
+
+....
+Name:              curlme-cka01-svcn
+Namespace:         default
+Labels:            <none>
+Annotations:       <none>
+Selector:          run=curlme-ckaO1-svcn
+Type:              ClusterIP
+IP Family Policy:  SingleStack
+IP Families:       IPv4
+IP:                10.109.45.180
+IPs:               10.109.45.180
+Port:              <unset>  80/TCP
+TargetPort:        80/TCP
+Endpoints:         <none>
+Session Affinity:  None
+Events:            <none>
+
+
+
+
+The service has no endpoints configured. As we can delete the resource, let's delete the service and create the service again.
+
+To delete the service, use the command kubectl delete svc curlme-cka01-svcn.
+You can create the service using imperative way or declarative way.
+
+
+Using imperative command:
+kubectl expose pod curlme-cka01-svcn --port=80
+
+
+
+Using declarative manifest:
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    run: curlme-cka01-svcn
+  name: curlme-cka01-svcn
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    run: curlme-cka01-svcn
+  type: ClusterIP
+
+
+
+
+You can test the connection from curlpod-cka-1-svcn using following.
+
+
+kubectl exec curlpod-cka01-svcn -- curl curlme-cka01-svcn
+
+Details
+
+
+Q. 19
+
+Task
+SECTION: SERVICE NETWORKING
+
+
+For this question, please set the context to cluster1 by running:
+
+
+kubectl config use-context cluster1
+
+
+
+Create a pod with name tester-cka02-svcn in dev-cka02-svcn namespace with image registry.k8s.io/e2e-test-images/jessie-dnsutils:1.3. Make sure to use command sleep 3600 with restart policy set to Always .
+
+
+Once the tester-cka02-svcn pod is running, store the output of the command nslookup kubernetes.default from tester pod into the file /root/dns_output on student-node.
+
+Solution
+Change to the cluster1 context before attempting the task:
+
+kubectl config use-context cluster1
+
+Since the dev-cka02-svcn namespace doesn't exist, let's create it first:
+
+kubectl create ns dev-cka02-svcn
+
+
+
+Create the pod as per the requirements:
+
+
+kubectl apply -f - << EOF
+apiVersion: v1
+kind: Pod
+metadata:
+  name: tester-cka02-svcn
+  namespace: dev-cka02-svcn
+spec:
+  containers:
+  - name: tester-cka02-svcn
+    image: registry.k8s.io/e2e-test-images/jessie-dnsutils:1.3
+    command:
+      - sleep
+      - "3600"
+  restartPolicy: Always
+EOF
+
+
+
+Now let store the correct output into the /root/dns_output on student-node :
+
+kubectl exec -n dev-cka02-svcn -i -t tester-cka02-svcn -- nslookup kubernetes.default > /root/dns_output
+
+
+
+We should have something similar to below output:
+
+
+student-node ~ ➜  cat /root/dns_output
+Server:         172.20.0.10
+Address:        172.20.0.10#53
+
+Name:   kubernetes.default.svc.cluster.local
+Address: 172.20.0.1
+
+Details
+
+
+
+
+
+
+Q. 20
+
+Task
+SECTION: SERVICE NETWORKING
+
+
+For this question, please set the context to cluster3 by running:
+
+
+kubectl config use-context cluster3
+
+
+
+Part I:
+
+Create a ClusterIP service .i.e. service-3421-svcn in the spectra-1267 ns which should expose the pods namely pod-23 and pod-21 with port set to 8080 and targetport to 80.
+
+Part II:
+
+Store the pod names and their ip addresses from the spectra-1267 ns at /root/pod_ips_cka05_svcn where the output is sorted by their IP's.
+
+Please ensure the format as shown below:
+
+POD_NAME        IP_ADDR
+pod-1           ip-1
+pod-3           ip-2
+pod-2           ip-3
+...
+
+Solution
+Switching to cluster3:
+
+kubectl config use-context cluster3
+
+The easiest way to route traffic to a specific pod is by the use of labels and selectors. List the pods along with their labels:
+
+student-node ~ ➜  kubectl get pods --show-labels -n spectra-1267
+NAME     READY   STATUS    RESTARTS   AGE     LABELS
+pod-12   1/1     Running   0          5m21s   env=dev,mode=standard,type=external
+pod-34   1/1     Running   0          5m20s   env=dev,mode=standard,type=internal
+pod-43   1/1     Running   0          5m20s   env=prod,mode=exam,type=internal
+pod-23   1/1     Running   0          5m21s   env=dev,mode=exam,type=external
+pod-32   1/1     Running   0          5m20s   env=prod,mode=standard,type=internal
+pod-21   1/1     Running   0          5m20s   env=prod,mode=exam,type=external
+
+Looks like there are a lot of pods created to confuse us. But we are only concerned with the labels of pod-23 and pod-21.
+
+
+As we can see both the required pods have labels mode=exam,type=external in common. Let's confirm that using kubectl too:
+
+student-node ~ ➜  kubectl get pod -l mode=exam,type=external -n spectra-1267                                    
+NAME     READY   STATUS    RESTARTS   AGE
+pod-23   1/1     Running   0          9m18s
+pod-21   1/1     Running   0          9m17s
+
+Nice!! Now as we have figured out the labels, we can proceed further with the creation of the service:
+
+student-node ~ ➜  kubectl create service clusterip service-3421-svcn -n spectra-1267 --tcp=8080:80 --dry-run=client -o yaml > service-3421-svcn.yaml
+
+Now modify the service definition with selectors as required before applying to k8s cluster:
+
+student-node ~ ➜  cat service-3421-svcn.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: service-3421-svcn
+  name: service-3421-svcn
+  namespace: spectra-1267
+spec:
+  ports:
+  - name: 8080-80
+    port: 8080
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: service-3421-svcn  # delete 
+    mode: exam    # add
+    type: external  # add
+  type: ClusterIP
+status:
+  loadBalancer: {}
+
+
+
+Finally let's apply the service definition:
+
+student-node ~ ➜  kubectl apply -f service-3421-svcn.yaml
+service/service-3421 created
+
+student-node ~ ➜  k get ep service-3421-svcn -n spectra-1267
+NAME           ENDPOINTS                     AGE
+service-3421   10.42.0.15:80,10.42.0.17:80   52s
+
+To store all the pod name along with their IP's, we could use imperative command as shown below:
+
+student-node ~ ➜  kubectl get pods -n spectra-1267 -o=custom-columns='POD_NAME:metadata.name,IP_ADDR:status.podIP' --sort-by=.status.podIP
+
+POD_NAME   IP_ADDR
+pod-12     10.42.0.18
+pod-23     10.42.0.19
+pod-34     10.42.0.20
+pod-21     10.42.0.21
+...
+
+# store the output to /root/pod_ips
+student-node ~ ➜  kubectl get pods -n spectra-1267 -o=custom-columns='POD_NAME:metadata.name,IP_ADDR:status.podIP' --sort-by=.status.podIP > /root/pod_ips_cka05_svcn
+
+Details
+
+
