@@ -254,7 +254,7 @@ The blue-dp-cka09-trb deployment is having 0 out of 1 pods running. Fix the issu
 Solution
 List the pods
 
-kubectl get pod
+        kubectl get pod
 
 Most probably you see Init:Error or Init:CrashLoopBackOff for the corresponding pod.
 
@@ -268,28 +268,30 @@ sh: can't open 'echo 'Welcome!'': No such file or directory
 
 Edit the deployment
 
-kubectl edit deploy blue-dp-cka09-trb
+        kubectl edit deploy blue-dp-cka09-trb
 
 Under initContainers: -> - command: add -c to the next line of - sh, so final command should look like this
-   initContainers:
-   - command:
-     - sh
-     - -c
-     - echo 'Welcome!'
+
+           initContainers:
+           - command:
+             - sh
+             - -c
+             - echo 'Welcome!'
 
 If you will check pod then it must be failing again but with different error this time, let's find that out
 
-kubectl get event --field-selector involvedObject.name=blue-dp-cka09-trb-xxxxx
+        kubectl get event --field-selector involvedObject.name=blue-dp-cka09-trb-xxxxx
 
 You will see an error something like
 
-Warning   Failed      pod/blue-dp-cka09-trb-69dd844f76-rv9z8   Error: failed to create containerd task: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: error during container init: error mounting "/var/lib/kubelet/pods/98182a41-6d6d-406a-a3e2-37c33036acac/volumes/kubernetes.io~configmap/nginx-config" to rootfs at "/etc/nginx/nginx.conf": mount /var/lib/kubelet/pods/98182a41-6d6d-406a-a3e2-37c33036acac/volumes/kubernetes.io~configmap/nginx-config:/etc/nginx/nginx.conf (via /proc/self/fd/6), flags: 0x5001: not a directory: unknown
+        Warning   Failed      pod/blue-dp-cka09-trb-69dd844f76-rv9z8   Error: failed to create containerd task: failed to create shim task: OCI runtime create failed: runc create failed: unable to start container process: error during container init: error mounting "/var/lib/kubelet/pods/98182a41-6d6d-406a-a3e2-37c33036acac/volumes/kubernetes.io~configmap/nginx-config" to rootfs at "/etc/nginx/nginx.conf": mount /var/lib/kubelet/pods/98182a41-6d6d-406a-a3e2-37c33036acac/volumes/kubernetes.io~configmap/nginx-config:/etc/nginx/nginx.conf (via /proc/self/fd/6), flags: 0x5001: not a directory: unknown
 
 Edit the deployment again
 
-kubectl edit deploy blue-dp-cka09-trb
+        kubectl edit deploy blue-dp-cka09-trb
 
 Under volumeMounts: -> - mountPath: /etc/nginx/nginx.conf -> name: nginx-config add subPath: nginx.conf and save the changes.
+
 Finally, the pod should be in running state.
 
 Details
